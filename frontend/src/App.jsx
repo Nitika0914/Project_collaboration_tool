@@ -9,22 +9,25 @@ import Dashboard from './pages/Dashboard';
 import ProjectPage from './pages/ProjectPage';
 import ManagerDashboard from './pages/ManagerDashboard';
 import TeamMemberDashboard from './pages/TeamMemberDashboard';
+import Header from './components/Header';
+
 const App = () => {
   return (
     <Router>
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-       <Route path="/About" element={<About />} />
-       <Route path="/about" element={<About />} />
-       <Route path="/Dashboard" element={<Dashboard />} />
-       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/project" element={<ProjectPage/>} />
-      <Route path="/manager" element={<ManagerDashboard />} />
-      <Route path="/member" element={<TeamMemberDashboard />} />
-
-    </Routes>
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/About" element={<About />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/project/:projectId" element={<ProjectPage/>} />
+        <Route path="/project" element={<ProjectPage/>} />
+        <Route path="/manager" element={<ManagerDashboard />} />
+        <Route path="/member" element={<TeamMemberDashboard />} />
+      </Routes>
     </Router>
   );
 };

@@ -18,22 +18,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <nav className="navbar">
-        <h2 className="logo">Project Collaboration Tool</h2>
-        <div className="nav-links">
-          <button
-            className="logout-btn"
-            onClick={() => {
-              localStorage.removeItem("user");
-              localStorage.removeItem("token");
-              navigate("/login");
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
       <header className="dashboard-header">
         <h1>Welcome, {user?.name} 👋</h1>
         <p>Manage your teams, projects, and tasks in one place.</p>

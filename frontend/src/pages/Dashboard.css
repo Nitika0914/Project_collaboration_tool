@@ -159,3 +159,29 @@
   font-size: 12px;
   color: #6b7280;
 }
+
+/* New: badges and list styles */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge.in_progress { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+.badge.todo { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+.badge.done { background: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e5e7eb;
+}
+.list-item:last-child { border-bottom: none; }

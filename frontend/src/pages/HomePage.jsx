@@ -21,36 +21,6 @@ const HomePage = () => {
 
   return (
     <div className="home-container">
-      <nav className="navbar">
-        <div className="container nav-inner">
-          <h2 className="logo">Project Collaboration Tool</h2>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
-            {!user ? (
-              <>
-                <Link to="/login" className="signup-btn">Login</Link>
-                <Link to="/signup" className="signup-btn">Sign Up</Link>
-              </>
-            ) : (
-              <>
-                {user.role === "project_manager" && (
-                  <Link to="/manager" className="signup-btn">Manager</Link>
-                )}
-                {user.role === "team_member" && (
-                  <Link to="/member" className="signup-btn">My Workspace</Link>
-                )}
-                {user.role === "admin" && (
-                  <Link to="/dashboard" className="signup-btn">Dashboard</Link>
-                )}
-                <button className="signup-btn" onClick={handleLogout}>Logout</button>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
       <header className="hero">
         <div className="container">
           <h1>Organize Your Teamwork Effortlessly</h1>
@@ -63,7 +33,6 @@ const HomePage = () => {
               <>
                 <Link to="/signup" className="btn-primary">Get Started</Link>
                 <Link to="/login" className="btn-secondary">Login</Link>
-                <Link to="/project" className="btn-primary">Task Management</Link>
               </>
             ) : (
               <>
@@ -76,7 +45,6 @@ const HomePage = () => {
                 {user.role === "admin" && (
                   <Link to="/dashboard" className="btn-primary">Open Dashboard</Link>
                 )}
-                <Link to="/project" className="btn-secondary">Task Board</Link>
               </>
             )}
           </div>

@@ -28,6 +28,8 @@ const User = require('./models/User');
 const Team = require('./models/Team');
 const Project = require('./models/Project');
 const TeamMember = require('./models/TeamMember');
+const Task = require('./models/Task');
+const JoinRequest = require('./models/JoinRequest');
 
 // Associations
 // User (manager) hasMany Team, Team belongsTo User (manager)
@@ -46,6 +48,16 @@ Project.belongsTo(User, { foreignKey: 'managerId', as: 'projectManager' });
 Team.belongsToMany(User, { through: TeamMember, foreignKey: 'teamId', otherKey: 'userId', as: 'members' });
 User.belongsToMany(Team, { through: TeamMember, foreignKey: 'userId', otherKey: 'teamId', as: 'teams' });
 
+// Project hasMany Task, Task belongsTo Project
+Project.hasMany(Task, { foreignKey: 'projectId', as: 'tasks' });
+Task.belongsTo(Project, { foreignKey: 'projectId', as: 'project' });
+
+// JoinRequest associations
+Team.hasMany(JoinRequest, { foreignKey: 'teamId', as: 'joinRequests' });
+User.hasMany(JoinRequest, { foreignKey: 'userId', as: 'joinRequests' });
+JoinRequest.belongsTo(Team, { foreignKey: 'teamId', as: 'team' });
+JoinRequest.belongsTo(User, { foreignKey: 'userId', as: 'requester' });
+
 sequelize.authenticate()
   .then(() => console.log("database connected successfully"))
   .then(() => sequelize.sync({ alter: true }))
@@ -58,6 +70,12 @@ app.use('/api/auth', authRoutes);
 
 const managerRoutes = require('./routes/manager');
 app.use('/api/manager', managerRoutes);
+
+const projectRoutes = require('./routes/project');
+app.use('/api/projects', projectRoutes);
+
+const teamRoutes = require('./routes/teams');
+app.use('/api/teams', teamRoutes);
 
 app.get('/api/protected', 
   passport.authenticate('jwt', { session: false }), 

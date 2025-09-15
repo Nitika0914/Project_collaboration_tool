@@ -14,6 +14,8 @@ const ManagerDashboard = () => {
 
   const [projectForm, setProjectForm] = useState({ name: "", description: "", teamId: "" });
   const [teamForm, setTeamForm] = useState({ name: "", members: [{ ...emptyMember }] });
+  const [pending, setPending] = useState([]);
+  const [acting, setActing] = useState({});
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -62,9 +64,17 @@ const ManagerDashboard = () => {
     }
   };
 
+  const fetchPending = async () => {
+    if (!token) return;
+    const res = await fetch("http://localhost:5000/api/teams/requests/pending", { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (res.ok) setPending(data.requests || []);
+  };
+
   useEffect(() => {
     fetchAllTeams();
     fetchActiveTeams();
+    fetchPending();
   }, [token]);
 
   const handleCreateProject = async (e) => {
@@ -89,6 +99,9 @@ const ManagerDashboard = () => {
       } else {
         setProjectForm({ name: "", description: "", teamId: "" });
         fetchActiveTeams();
+        if (data.project?.id) {
+          navigate(`/project/${data.project.id}`);
+        }
       }
     } catch (e) {
       setError("Server error");
@@ -138,123 +151,170 @@ const ManagerDashboard = () => {
     }
   };
 
+  const actOnRequest = async (requestId, action) => {
+    setActing((a) => ({ ...a, [requestId]: true }));
+    try {
+      const res = await fetch(`http://localhost:5000/api/teams/requests/${requestId}/${action}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) alert(data.message || "Action failed");
+      await fetchPending();
+    } finally {
+      setActing((a) => ({ ...a, [requestId]: false }));
+    }
+  };
+
   return (
     <div className="dashboard-container">
-      <nav className="navbar">
-        <h2 className="logo">Manager Console</h2>
-        <div className="nav-links">
-          <button
-            className="logout-btn"
-            onClick={() => {
-              localStorage.removeItem("user");
-              localStorage.removeItem("token");
-              navigate("/login");
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
       <header className="dashboard-header">
         <h1>Welcome, {user?.name}</h1>
         <p>Plan projects, assign tasks, and manage your team.</p>
       </header>
 
       <section className="dashboard-content">
-        <h2>Create Team</h2>
-        {error && <p style={{ color: "#d33" }}>{error}</p>}
-        <form onSubmit={handleCreateTeam} className="login-form" style={{ maxWidth: 720 }}>
-          <div className="login-field">
-            <label>Team Name</label>
-            <input
-              type="text"
-              value={teamForm.name}
-              onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
-              placeholder="Enter team name"
-              required
-            />
+        <div className="form-card">
+          <div className="form-header">
+            <div className="form-title">Create Team</div>
+            <div className="form-subtitle">Add members by name, email and mobile</div>
           </div>
+          {error && <p style={{ color: "#d33" }}>{error}</p>}
+          <form onSubmit={handleCreateTeam} style={{ maxWidth: 960 }}>
+            <div>
+              <label className="label">Team Name</label>
+              <input
+                className="input"
+                type="text"
+                value={teamForm.name}
+                onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                placeholder="Enter team name"
+                required
+              />
+              <p className="helper">E.g. Frontend Squad, Mobile Team</p>
+            </div>
 
-          <div className="login-field">
-            <label>Members</label>
-            {teamForm.members.map((m, idx) => (
-              <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: 8, marginBottom: 8 }}>
-                <input
-                  type="text"
-                  placeholder="Full name"
-                  value={m.name}
-                  onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
-                  required
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={m.email}
-                  onChange={(e) => handleMemberChange(idx, "email", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Mobile"
-                  value={m.mobile}
-                  onChange={(e) => handleMemberChange(idx, "mobile", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Role in team (optional)"
-                  value={m.roleInTeam}
-                  onChange={(e) => handleMemberChange(idx, "roleInTeam", e.target.value)}
-                />
-                <button type="button" className="btn-primary" onClick={() => handleRemoveMemberRow(idx)}>Remove</button>
+            <div style={{ marginTop: 16 }}>
+              <label className="label">Members</label>
+              {teamForm.members.map((m, idx) => (
+                <div key={idx} className="form-row" style={{ marginBottom: 8 }}>
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="Full name"
+                    value={m.name}
+                    onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
+                    required
+                  />
+                  <input
+                    className="input"
+                    type="email"
+                    placeholder="Email"
+                    value={m.email}
+                    onChange={(e) => handleMemberChange(idx, "email", e.target.value)}
+                    required
+                  />
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="Mobile"
+                    value={m.mobile}
+                    onChange={(e) => handleMemberChange(idx, "mobile", e.target.value)}
+                    required
+                  />
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="Role in team (optional)"
+                    value={m.roleInTeam}
+                    onChange={(e) => handleMemberChange(idx, "roleInTeam", e.target.value)}
+                  />
+                  <button type="button" className="btn-danger" onClick={() => handleRemoveMemberRow(idx)}>Remove</button>
+                </div>
+              ))}
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={handleAddMemberRow}>+ Add Member</button>
               </div>
-            ))}
-            <button type="button" className="btn-primary" onClick={handleAddMemberRow}>+ Add Member</button>
-          </div>
+            </div>
 
-          <button type="submit" className="login-button">Create Team</button>
-        </form>
+            <div className="form-actions">
+              <button type="submit" className="btn-primary">Create Team</button>
+            </div>
+          </form>
+        </div>
       </section>
 
       <section className="dashboard-content">
-        <h2>Create New Project</h2>
-        {error && <p style={{ color: "#d33" }}>{error}</p>}
-        <form onSubmit={handleCreateProject} className="login-form" style={{ maxWidth: 520 }}>
-          <div className="login-field">
-            <label>Project Name</label>
-            <input
-              type="text"
-              value={projectForm.name}
-              onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
-              placeholder="Enter project name"
-              required
-            />
+        <div className="form-card">
+          <div className="form-header">
+            <div className="form-title">Create Project</div>
+            <div className="form-subtitle">Assign the project to one of your teams</div>
           </div>
-          <div className="login-field">
-            <label>Description</label>
-            <input
-              type="text"
-              value={projectForm.description}
-              onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-              placeholder="Short description (optional)"
-            />
-          </div>
-          <div className="login-field">
-            <label>Team</label>
-            <select
-              value={projectForm.teamId}
-              onChange={(e) => setProjectForm({ ...projectForm, teamId: e.target.value })}
-              required
-            >
-              <option value="">Select a team</option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-          <button type="submit" className="login-button">Create Project</button>
-        </form>
+          {error && <p style={{ color: "#d33" }}>{error}</p>}
+          <form onSubmit={handleCreateProject} style={{ maxWidth: 720 }}>
+            <div className="form-grid">
+              <div>
+                <label className="label">Project Name</label>
+                <input
+                  className="input"
+                  type="text"
+                  value={projectForm.name}
+                  onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
+                  placeholder="Enter project name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">Team</label>
+                <select
+                  className="select"
+                  value={projectForm.teamId}
+                  onChange={(e) => setProjectForm({ ...projectForm, teamId: e.target.value })}
+                  required
+                >
+                  <option value="">Select a team</option>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <label className="label">Description</label>
+              <input
+                className="input"
+                type="text"
+                value={projectForm.description}
+                onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                placeholder="Short description (optional)"
+              />
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn-primary">Create Project</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section className="dashboard-content">
+        <h2>Pending Join Requests</h2>
+        <div className="projects-grid">
+          {pending.length === 0 ? (
+            <div className="project-card"><p>No pending requests</p></div>
+          ) : (
+            pending.map((r) => (
+              <div key={r.id} className="project-card">
+                <h3>{r.team?.name}</h3>
+                <p className="helper">{r.requester?.name} ({r.requester?.email}) wants to join</p>
+                <div className="form-actions">
+                  <button className="btn-primary" disabled={acting[r.id]} onClick={() => actOnRequest(r.id, 'approve')}>{acting[r.id] ? '...' : 'Approve'}</button>
+                  <button className="btn-danger" disabled={acting[r.id]} onClick={() => actOnRequest(r.id, 'reject')}>{acting[r.id] ? '...' : 'Reject'}</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </section>
 
       <section className="dashboard-content">
@@ -272,10 +332,14 @@ const ManagerDashboard = () => {
               activeTeams.map((team) => (
                 <div key={team.id} className="project-card">
                   <h3>{team.name}</h3>
-                  <ul style={{ marginTop: 8 }}>
+                  <ul className="list" style={{ marginTop: 8 }}>
                     {team.projects?.map((p) => (
-                      <li key={p.id}>
-                        <strong>{p.name}</strong> — {p.status}
+                      <li key={p.id} className="list-item">
+                        <div>
+                          <strong>{p.name}</strong>
+                          <span style={{ marginLeft: 8 }} className={`badge ${p.status}`}>{p.status.replace('_', ' ')}</span>
+                        </div>
+                        <Link to={`/project/${p.id}`} className="btn-secondary">Open Board</Link>
                       </li>
                     ))}
                   </ul>
