@@ -30,8 +30,20 @@ export default function Login() {
         setError(data.message || "Login failed");
       } else {
         localStorage.setItem("token", data.token);
-        // Redirect to dashboard or other protected route
-        navigate("/dashboard");
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          // Navigate based on role
+          if (data.user.role === "project_manager") {
+            navigate("/manager");
+          } else if (data.user.role === "team_member") {
+            navigate("/member");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          // Fallback
+          navigate("/dashboard");
+        }
       }
     } catch (err) {
       setError("Server error");

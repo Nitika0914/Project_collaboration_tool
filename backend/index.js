@@ -25,6 +25,26 @@ app.use(passport.session());
 //database
 const sequelize = require('./config/database');
 const User = require('./models/User');
+const Team = require('./models/Team');
+const Project = require('./models/Project');
+const TeamMember = require('./models/TeamMember');
+
+// Associations
+// User (manager) hasMany Team, Team belongsTo User (manager)
+User.hasMany(Team, { foreignKey: 'managerId', as: 'managedTeams' });
+Team.belongsTo(User, { foreignKey: 'managerId', as: 'manager' });
+
+// Team hasMany Project, Project belongsTo Team
+Team.hasMany(Project, { foreignKey: 'teamId', as: 'projects' });
+Project.belongsTo(Team, { foreignKey: 'teamId', as: 'team' });
+
+// User (manager) hasMany Project
+User.hasMany(Project, { foreignKey: 'managerId', as: 'managedProjects' });
+Project.belongsTo(User, { foreignKey: 'managerId', as: 'projectManager' });
+
+// Team <-> User many-to-many via TeamMember
+Team.belongsToMany(User, { through: TeamMember, foreignKey: 'teamId', otherKey: 'userId', as: 'members' });
+User.belongsToMany(Team, { through: TeamMember, foreignKey: 'userId', otherKey: 'teamId', as: 'teams' });
 
 sequelize.authenticate()
   .then(() => console.log("database connected successfully"))
@@ -35,6 +55,9 @@ sequelize.authenticate()
 //routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
+
+const managerRoutes = require('./routes/manager');
+app.use('/api/manager', managerRoutes);
 
 app.get('/api/protected', 
   passport.authenticate('jwt', { session: false }), 

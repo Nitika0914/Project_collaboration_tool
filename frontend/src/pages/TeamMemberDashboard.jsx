@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Dashboard.css";
 
-const Dashboard = () => {
+const TeamMemberDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  // check if logged in (you’ll use JWT or session later)
   useEffect(() => {
-    const storedUser = localStorage.getItem("user"); // after login, save user here
+    const storedUser = localStorage.getItem("user");
     if (!storedUser) {
-      navigate("/login"); // redirect if not logged in
-    } else {
-      setUser(JSON.parse(storedUser));
+      navigate("/login");
+      return;
     }
+    const parsed = JSON.parse(storedUser);
+    if (parsed.role !== "team_member") {
+      navigate("/");
+      return;
+    }
+    setUser(parsed);
   }, [navigate]);
 
   return (
     <div className="dashboard-container">
       <nav className="navbar">
-        <h2 className="logo">Project Collaboration Tool</h2>
+        <h2 className="logo">My Workspace</h2>
         <div className="nav-links">
           <button
             className="logout-btn"
@@ -35,32 +39,34 @@ const Dashboard = () => {
       </nav>
 
       <header className="dashboard-header">
-        <h1>Welcome, {user?.name} 👋</h1>
-        <p>Manage your teams, projects, and tasks in one place.</p>
+        <h1>Hi, {user?.name}</h1>
+        <p>View and update your assigned tasks.</p>
       </header>
 
       <section className="dashboard-actions">
-        <button className="btn-primary">+ Create Team</button>
-        <button className="btn-primary">+ Join Team</button>
-        <button className="btn-primary">+ Create Project</button>
+        <button className="btn-primary">My Tasks</button>
+        <button className="btn-primary">My Teams</button>
+        <button className="btn-primary">Activity</button>
       </section>
 
       <section className="dashboard-content">
-        <h2>Your Teams & Projects</h2>
+        <h2>Quick Access</h2>
         <div className="projects-grid">
-          {/* later map API data here */}
           <div className="project-card">
-            <h3>Team Alpha</h3>
-            <p>Project: Website Redesign</p>
+            <h3>Today</h3>
+            <p>See what’s due today.</p>
           </div>
           <div className="project-card">
-            <h3>Team Beta</h3>
-            <p>Project: Mobile App</p>
+            <h3>Upcoming</h3>
+            <p>Prepare for upcoming tasks.</p>
           </div>
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <Link to="/project" className="btn-primary">Open Task Board</Link>
         </div>
       </section>
     </div>
   );
 };
 
-export default Dashboard;
+export default TeamMemberDashboard; 

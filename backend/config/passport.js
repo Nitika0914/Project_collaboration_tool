@@ -6,7 +6,6 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
-// Local strategy for login
 passport.use('local', new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
@@ -24,7 +23,6 @@ passport.use('local', new LocalStrategy({
   }
 }));
 
-// JWT strategy for protected routes
 passport.use(new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: JWT_SECRET,

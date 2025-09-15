@@ -40,17 +40,17 @@ router.post('/register', async (req, res) => {
 //         if (!email || !password) {
 //             return res.status(400).json({ message: 'Email and password are required'});
 //         }
-
+//
 //         const user = User.findOne({where: {email}});
 //         if (!user) {
 //             return res.status(401).json({ message: 'Email not registered or invalid'});
 //         }
-
+//
 //         const isMatched = await bcrypt.compare(password, user.password);
 //         if (!isMatched) {
 //             return res.status(401).json({ message: 'Invalid credentials'});
 //         }
-
+//
 //         res.status(200).json({ message: 'User logged in successfully'});
 //     } catch (error) {
 //         res.status(500).json({ message: 'Server error', error: error.message });
@@ -67,12 +67,39 @@ router.post('/login', (req, res, next)=>{
 
             const token = jwt.sign(
                 { id: user.id },
-                process.env.JWT_SECRET,
+                process.env.JWT_SECRET || JWT_SECRET,
                 { expiresIn: '1h' }
             );
-            return res.json({token});
+
+            const publicUser = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                mobile: user.mobile,
+            };
+
+            return res.json({ token, user: publicUser });
         });
     })(req, res, next);
 })
+
+// Get current user by token
+router.get('/me', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+        const publicUser = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            mobile: user.mobile,
+        };
+        return res.json({ user: publicUser });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
 
 module.exports = router;

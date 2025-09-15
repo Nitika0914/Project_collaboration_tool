@@ -1,9 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./HomePage.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/login");
+  };
+
   return (
     <div className="home-container">
       <nav className="navbar">
@@ -13,13 +28,29 @@ const HomePage = () => {
             <Link to="/">Home</Link>
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
-            <Link to="/login" className="signup-btn">Login</Link>
-            <Link to="/signup" className="signup-btn">Sign Up</Link>
+            {!user ? (
+              <>
+                <Link to="/login" className="signup-btn">Login</Link>
+                <Link to="/signup" className="signup-btn">Sign Up</Link>
+              </>
+            ) : (
+              <>
+                {user.role === "project_manager" && (
+                  <Link to="/manager" className="signup-btn">Manager</Link>
+                )}
+                {user.role === "team_member" && (
+                  <Link to="/member" className="signup-btn">My Workspace</Link>
+                )}
+                {user.role === "admin" && (
+                  <Link to="/dashboard" className="signup-btn">Dashboard</Link>
+                )}
+                <button className="signup-btn" onClick={handleLogout}>Logout</button>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
       <header className="hero">
         <div className="container">
           <h1>Organize Your Teamwork Effortlessly</h1>
@@ -28,9 +59,26 @@ const HomePage = () => {
             track progress, and keep your team aligned — all in one place.
           </p>
           <div className="hero-buttons">
-            <Link to="/signup" className="btn-primary">Get Started</Link>
-            <Link to="/login" className="btn-secondary">Login</Link>
-              <Link to="/project" className="btn-primary">Task Management</Link>  {/* 👈 New button */}
+            {!user ? (
+              <>
+                <Link to="/signup" className="btn-primary">Get Started</Link>
+                <Link to="/login" className="btn-secondary">Login</Link>
+                <Link to="/project" className="btn-primary">Task Management</Link>
+              </>
+            ) : (
+              <>
+                {user.role === "project_manager" && (
+                  <Link to="/manager" className="btn-primary">Open Manager Console</Link>
+                )}
+                {user.role === "team_member" && (
+                  <Link to="/member" className="btn-primary">Open My Workspace</Link>
+                )}
+                {user.role === "admin" && (
+                  <Link to="/dashboard" className="btn-primary">Open Dashboard</Link>
+                )}
+                <Link to="/project" className="btn-secondary">Task Board</Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -77,8 +125,7 @@ const HomePage = () => {
             <Link to="/">Home</Link>
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
-            <Link to="/login">Login</Link>
-            
+            {!user && <Link to="/login">Login</Link>}
           </div>
 
           <div className="footer-contact">
