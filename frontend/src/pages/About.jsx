@@ -5,7 +5,7 @@ import "./About.css";
 const AboutPage = () => {
   return (
     <div className="about-root">
-      {/* Navbar */}
+ 
       <nav className="navbar">
         <div className="container nav-inner">
           <h2 className="logo">Project Collaboration Tool</h2>
@@ -18,7 +18,7 @@ const AboutPage = () => {
         </div>
       </nav>
       
-      {/* Main Content */}
+      
       <main className="about-main">
         <div className="container">
           <h1 className="about-title">About Project Collaboration Tool</h1>
