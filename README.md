@@ -10,10 +10,8 @@ This is the backend API for a project collaboration system built with Node.js, E
 Features
     User registration with secure password hashing via bcrypt
 
-    User login with Passport local strategy
-
     JSON Web Token (JWT) issued upon successful login for stateless authentication
 
-    Protected API endpoints secured with Passport JWT strategy
+    Protected API endpoints
 
     PostgreSQL database integration using Sequelize ORM
