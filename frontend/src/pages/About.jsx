@@ -12,7 +12,6 @@ const AboutPage = () => {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
             <Link to="/login" className="login-btn">Login</Link>
             <Link to="/signup" className="signup-btn">Sign Up</Link>
           </div>
